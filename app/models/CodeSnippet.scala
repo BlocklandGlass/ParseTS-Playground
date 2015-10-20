@@ -1,15 +1,16 @@
 package models
 
-import javax.inject.Singleton
-
 import com.google.inject.{ImplementedBy, Inject}
+import models.Driver.api._
+import play.api.db.slick._
 import play.api.libs.concurrent.Execution.Implicits._
+import slick.lifted.ProvenShape
 
 import scala.concurrent.Future
 
-case class CodeSnippet(label: String, code: String, analysisResult: Option[AnalysisResult] = None)
+case class CodeSnippet(label: String, code: String)
 
-@ImplementedBy(classOf[InMemoryCodeSnipeptStore])
+@ImplementedBy(classOf[SlickCodeSnippetStore])
 trait CodeSnippetStore {
   def all: Future[Seq[(Int, CodeSnippet)]]
 
@@ -18,41 +19,40 @@ trait CodeSnippetStore {
   def save(snippet: CodeSnippet): Future[Int]
 }
 
-@Singleton
-class InMemoryCodeSnipeptStore @Inject()(analysisEngine: AnalysisEngine) extends CodeSnippetStore {
-  private var snippets = Seq[CodeSnippet]()
+class CodeSnippets(tag: Tag) extends Table[(Int, CodeSnippet)](tag, "code_snippets") {
+  def id = column[Int]("id", O.PrimaryKey)
 
-  override def all: Future[Seq[(Int, CodeSnippet)]] = Future {
-    synchronized {
-      snippets.zipWithIndex.map(_.swap)
-    }
-  }
+  def label = column[String]("label")
 
-  override def byId(id: Int): Future[Option[CodeSnippet]] = Future {
-    synchronized {
-      snippets.drop(id).headOption
-    }
-  }
+  def code = column[String]("code")
 
-  private def saveToBackend(snippet: CodeSnippet): Future[Int] = {
-    Future {
-      synchronized {
-        val copied = snippet.copy()
-        snippets :+= copied
-        snippets.indexWhere(_ eq copied)
-      }
-    }
-  }
+  def snippet = (label, code) <>(CodeSnippet.tupled, CodeSnippet.unapply)
+
+  override def * : ProvenShape[(Int, CodeSnippet)] = (id, snippet)
+}
+
+object CodeSnippets extends TableQuery(new CodeSnippets(_))
+
+class SlickCodeSnippetStore @Inject()(analysisStore: AnalysisStore,
+                                      val dbConfigProvider: DatabaseConfigProvider
+                                       ) extends CodeSnippetStore with HasDatabaseConfigProvider[Driver] {
+  private val allQ = CodeSnippets.sortBy(_.id.desc)
+
+  private def byIdQ(id: Rep[Int]) = allQ.filter(_.id === id).map(_.snippet).take(1)
+
+  private def saveQ(snippet: CodeSnippet) = CodeSnippets.map(_.snippet).returning(CodeSnippets.map(_.id)) += snippet
+
+  private val compiledAllQ = Compiled(allQ)
+  private val compiledByIdQ = Compiled(byIdQ _)
+
+  override def all: Future[Seq[(Int, CodeSnippet)]] = db.run(compiledAllQ.result)
+
+  override def byId(id: Int): Future[Option[CodeSnippet]] = db.run(compiledByIdQ(id).result.headOption)
 
   override def save(snippet: CodeSnippet): Future[Int] = {
     for {
-      id <- saveToBackend(snippet)
-      analysisResult <- analysisEngine.analyzeSnippet(snippet.code)
-    } yield {
-      synchronized {
-        snippets = snippets.updated(id, snippet.copy(analysisResult = Some(analysisResult)))
-      }
-      id
-    }
+      id <- db.run(saveQ(snippet))
+      _ <- analysisStore.analyzeSnippet(id, snippet)
+    } yield id
   }
 }

@@ -7,10 +7,11 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  jdbc,
-  cache,
-  ws,
   specs2 % Test,
+  "com.typesafe.slick" %% "slick" % "3.1.0",
+  "com.typesafe.play" %% "play-slick" % "1.1.0",
+  "com.typesafe.play" %% "play-slick-evolutions" % "1.1.0",
+  "org.postgresql" % "postgresql" % "9.4-1204-jdbc42",
   "com.jsuereth" %% "scala-arm" % "1.4",
   "org.webjars" %% "webjars-play" % "2.4.0-2",
   "org.webjars" % "bootstrap" % "4.0.0-alpha",
