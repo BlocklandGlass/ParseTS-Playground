@@ -1,5 +1,13 @@
 @(snippet: CodeSnippet, analysisResult: Option[AnalysisResult])
 
+@severityCssClass(severity: AnalysisResult.ComplaintSeverity) = {
+@severity match {
+    case AnalysisResult.ComplaintSeverity.Fatal => {alert-danger}
+    case AnalysisResult.ComplaintSeverity.Warning => {alert-warning}
+    case _ => {}
+}
+}
+
 @main("Snippet") {
     <h2>Snippet: @snippet.label</h2>
     @if(analysisResult.isEmpty) {
@@ -14,13 +22,16 @@
     <p><small>(why you're here!)</small></p>
     @analysisResult match {
         case None => {
-            In progress...
+            <p>In progress...</p>
+        }
+        case Some(analysis) if analysis.complaints.isEmpty => {
+            <p>Everything looks great!</p>
         }
         case Some(analysis) => {
             <ul>
-                @for(warning <- analysis.complaints) {
-                    <li>Line @warning.pos.line, column @warning.pos.column: @warning.msg</li>
-                }
+            @for(complaint <- analysis.complaints) {
+                <li class="@severityCssClass(complaint.severity)">Line @complaint.pos.line, column @complaint.pos.column: @complaint.msg</li>
+            }
             </ul>
         }
     }

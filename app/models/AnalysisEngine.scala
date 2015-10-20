@@ -4,7 +4,7 @@ import java.nio.file.Path
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import models.AnalysisResult.{Complaint, LinkedComplaint, SourcePos}
+import models.AnalysisResult.{ComplaintSeverity, Complaint, LinkedComplaint, SourcePos}
 import models.Driver.api._
 import models.ParseTSAnalysisEngine.ParseFailedException
 import play.api.Configuration
@@ -15,6 +15,7 @@ import slick.lifted.ProvenShape
 import utils.TemporaryFile
 
 import scala.concurrent.Future
+import scala.util.Try
 
 case class AnalysisResult(complaints: Seq[Complaint])
 
@@ -22,7 +23,14 @@ object AnalysisResult {
 
   case class SourcePos(line: Int, column: Int)
 
-  case class Complaint(msg: String, pos: SourcePos)
+  object ComplaintSeverity extends Enumeration {
+    val Fatal = Value("Fatal")
+    val Warning = Value("Warning")
+    val Info = Value("Info")
+  }
+  type ComplaintSeverity = ComplaintSeverity.Value
+
+  case class Complaint(msg: String, severity: ComplaintSeverity, pos: SourcePos)
 
   case class LinkedComplaint(complaint: Complaint, analysisId: Int)
 
@@ -31,6 +39,8 @@ object AnalysisResult {
 }
 
 class AnalysisComplaints(tag: Tag) extends Table[(Int, LinkedComplaint)](tag, "code_snippet_analysis_complaints") {
+  implicit val severityMapper = MappedColumnType.base[ComplaintSeverity, String](_.toString, ComplaintSeverity.withName)
+
   def id = column[Int]("id", O.PrimaryKey)
 
   def analysisId = column[Int]("analysis_id")
@@ -41,11 +51,13 @@ class AnalysisComplaints(tag: Tag) extends Table[(Int, LinkedComplaint)](tag, "c
 
   def message = column[String]("message")
 
+  def severity = column[ComplaintSeverity]("severity")
+
   def analysis = foreignKey("analysis_fk", analysisId, AnalysisResults)(_.id)
 
   def pos = (line, col) <>(SourcePos.tupled, SourcePos.unapply)
 
-  def complaint = (message, pos) <>(Complaint.tupled, Complaint.unapply)
+  def complaint = (message, severity, pos) <>(Complaint.tupled, Complaint.unapply)
 
   def linkedComplaint = (complaint, analysisId) <>(LinkedComplaint.tupled, LinkedComplaint.unapply)
 
@@ -75,7 +87,7 @@ trait AnalysisEngine {
 
 class ParseTSAnalysisEngine @Inject()(config: Configuration) extends AnalysisEngine {
 
-  private case class RawComplaint(msg: String)
+  private case class RawComplaint(msg: String, severity: ComplaintSeverity)
 
   private case class WithSourcePos[T](pos: SourcePos, value: T)
 
@@ -97,6 +109,7 @@ class ParseTSAnalysisEngine @Inject()(config: Configuration) extends AnalysisEng
   private def parsedAnalysisResult(path: Path): ParsedAnalysisResult = {
     import play.api.libs.functional.syntax._
     import play.api.libs.json._
+    implicit val severityReads = implicitly[Reads[String]].map(ComplaintSeverity.withName)
     implicit val complaintReads = Json.reads[RawComplaint]
     implicit val sourcePosReads = Json.reads[SourcePos]
     implicit def withSourcePosReads[T: Reads] =
@@ -113,7 +126,7 @@ class ParseTSAnalysisEngine @Inject()(config: Configuration) extends AnalysisEng
   override def analyzeSnippet(code: String): Future[AnalysisResult] = Future {
     managed(TemporaryFile.createWithContents(code, "parsets-demo-snippet-", ".cs")).acquireAndGet { tempFile =>
       val rawAnalysis = parsedAnalysisResult(tempFile.path)
-      AnalysisResult(rawAnalysis.complaints.map(complaint => Complaint(complaint.value.msg, complaint.pos)))
+      AnalysisResult(rawAnalysis.complaints.map(complaint => Complaint(complaint.value.msg, complaint.value.severity, complaint.pos)))
     }
   }
 }

@@ -16,7 +16,8 @@ CREATE TABLE code_snippet_analysis_complaints(
   analysis_id INTEGER NOT NULL REFERENCES code_snippet_analysis_results,
   line INTEGER NOT NULL,
   col INTEGER NOT NULL,
-  message TEXT NOT NULL
+  message TEXT NOT NULL,
+  severity TEXT NOT NULL
 );
 
 # --- !Downs
