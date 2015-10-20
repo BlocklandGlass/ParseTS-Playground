@@ -19,7 +19,7 @@
         case Some(analysis) => {
             <ul>
                 @for(warning <- analysis.warnings) {
-                    <li>Line @warning.pos.line, column @warning.pos.column: @warning.value.msg</li>
+                    <li>Line @warning.pos.line, column @warning.pos.column: @warning.msg</li>
                 }
             </ul>
         }
