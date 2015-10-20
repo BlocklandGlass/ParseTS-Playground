@@ -1,0 +1,27 @@
+@(snippet: CodeSnippet)
+
+@main("Snippet") {
+    <h2>Snippet: @snippet.label</h2>
+    @if(snippet.analysisResult.isEmpty) {
+        <div class="alert alert-warning">
+            <h3>Analysis in progress</h3>
+            <p>This snippet is still being analyzed, please wait...</p>
+        </div>
+    }
+    <h3>Code:</h3>
+    <textarea readonly id="code">@snippet.code</textarea>
+    <h3>Analysis</h3>
+    <p><small>(why you're here!)</small></p>
+    @snippet.analysisResult match {
+        case None => {
+            In progress...
+        }
+        case Some(analysis) => {
+            <ul>
+                @for(warning <- analysis.warnings) {
+                    <li>Line @warning.pos.line, column @warning.pos.column: @warning.value.msg</li>
+                }
+            </ul>
+        }
+    }
+}
