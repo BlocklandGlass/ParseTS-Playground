@@ -1,4 +1,4 @@
-{ stdenv, pkgs, jre, jdk, sbt, parsets, makeWrapper, writeText
+{ stdenv, pkgs, fetchgitLocal, jre, jdk, sbt, parsets, makeWrapper, writeText
 , pidFile ? "/dev/null"
 , devMode ? false
 , extraConfig ? ""
@@ -7,6 +7,7 @@
 assert (builtins.isBool devMode);
 
 let
+  localDevConfig = ./conf/local.conf;
   generatedConfig = writeText "parsets-playground.conf" ''
     ${stdenv.lib.optionalString devMode "include \"local.dev.conf\""}
     parsets.bin = "${parsets}/bin/parsets"
@@ -15,15 +16,13 @@ let
 in stdenv.mkDerivation rec {
   name = "parsets-playground-${version}";
   version = "0.0.1-alpha1";
-  src = ./.;
+  src = fetchgitLocal ./.;
 
   buildInputs = [ jre jdk sbt parsets makeWrapper ];
 
   configurePhase =
     ''
-      if [ -e conf/local.conf ]; then
-        mv conf/local.conf conf/local.dev.conf
-      fi
+      ${stdenv.lib.optionalString devMode "cp ${localDevConfig} conf/local.dev.conf"}
 
       ln -s ${generatedConfig} conf/local.conf
       sbt playUpdateSecret
