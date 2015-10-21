@@ -1,4 +1,4 @@
-{ stdenv, jre, jdk, sbt, parsets, makeWrapper, writeText
+{ stdenv, pkgs, jre, jdk, sbt, parsets, makeWrapper, writeText
 , pidFile ? "/dev/null"
 , devMode ? false
 , extraConfig ? ""
@@ -36,6 +36,11 @@ in stdenv.mkDerivation rec {
         --set JAVA_HOME ${jre} \
         --add-flags \
           -Dpidfile.path=${pidFile}
+
+      mkdir -p $out/etc
+      cat >$out/etc/process_config <<EOF
+      container_process=$out/bin/parsets-playground
+      EOF
     '';
   dontStrip = true;
   preFixup = "rm -rf $out/share/doc";
