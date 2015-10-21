@@ -9,6 +9,7 @@ assert preserveLocalConfig;
 
 let
   generatedConfig = writeText "parsets-playground.conf" ''
+    ${stdenv.lib.optionalString preserveLocalConfig "include \"local.dev.conf\""}
     parsets.bin = "${parsets}/bin/parsets"
     ${extraConfig}
   '';
@@ -25,10 +26,7 @@ in stdenv.mkDerivation rec {
         mv conf/local.conf conf/local.dev.conf
       fi
 
-      cat >conf/local.conf <<EOF
-        ${stdenv.lib.optionalString preserveLocalConfig "include \"local.dev.conf\""}
-        include "${generatedConfig}"
-      EOF
+      ln -s ${generatedConfig} conf/local.conf
       sbt playUpdateSecret
     '';
   buildPhase = "sbt stage";
