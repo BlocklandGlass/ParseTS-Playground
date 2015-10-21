@@ -1,15 +1,14 @@
 { stdenv, jre, jdk, sbt, parsets, makeWrapper, writeText
 , pidFile ? "/dev/null"
-, preserveLocalConfig ? false
+, devMode ? false
 , extraConfig ? ""
 }:
 
-assert (builtins.isBool preserveLocalConfig);
-assert preserveLocalConfig;
+assert (builtins.isBool devMode);
 
 let
   generatedConfig = writeText "parsets-playground.conf" ''
-    ${stdenv.lib.optionalString preserveLocalConfig "include \"local.dev.conf\""}
+    ${stdenv.lib.optionalString devMode "include \"local.dev.conf\""}
     parsets.bin = "${parsets}/bin/parsets"
     ${extraConfig}
   '';
