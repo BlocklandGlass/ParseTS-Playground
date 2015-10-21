@@ -6,4 +6,9 @@ target
 /.project
 /.settings
 /RUNNING_PID
+
+# Local settings
 conf/local.conf
+
+# Nix build output
+result
