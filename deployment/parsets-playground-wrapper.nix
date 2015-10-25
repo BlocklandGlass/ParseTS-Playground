@@ -4,10 +4,15 @@
 , port
 , exposePort ? true
 , lib
+, useRecaptcha ? false
+, recaptchaSiteKey ? null
+, recaptchaSecretKey ? null
 , postgresql
 , postgresqlPort
 , postgresqlDatabase ? "parsets-playground"
 }:
+
+assert useRecaptcha -> (recaptchaSiteKey != null && recaptchaSecretKey != null);
 
 let
   configFile = writeText "parsets-playground.conf"
@@ -15,6 +20,17 @@ let
       include "application.conf"
       play.evolutions.db.default.autoApply = true
       slick.dbs.default.db.url = "jdbc:postgresql://localhost:${toString postgresqlPort}/${postgresqlDatabase}"
+      ${optionalString useRecaptcha
+        ''
+          captcha {
+            provider = "recaptcha"
+            recaptcha {
+              siteKey = ${recaptchaSiteKey}
+              secretKey = ${recaptchaSecretKey}
+            }
+          }
+        ''
+      }
     '';
   initDbScript = writeScript "parsets-playground-initdb"
     ''
