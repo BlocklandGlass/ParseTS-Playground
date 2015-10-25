@@ -20,7 +20,7 @@ let
       include "application.conf"
       play.evolutions.db.default.autoApply = true
       slick.dbs.default.db.url = "jdbc:postgresql://localhost:${toString postgresqlPort}/${postgresqlDatabase}"
-      ${optionalString useRecaptcha
+      ${lib.optionalString useRecaptcha
         ''
           captcha {
             provider = "recaptcha"
