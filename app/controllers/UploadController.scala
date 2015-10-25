@@ -19,7 +19,7 @@ class UploadController @Inject() (val messagesApi: MessagesApi, snippetStore: Co
     "code" -> nonEmptyText
   )(UploadForm.apply)(UploadForm.unapply))
 
-  def upload = Action {
+  def upload = Action { implicit req =>
     Ok(views.html.upload(uploadForm, captcha.display))
   }
 

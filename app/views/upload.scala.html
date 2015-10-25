@@ -1,4 +1,4 @@
-@(uploadForm: Form[UploadController.UploadForm], captcha: Html)(implicit messages: Messages)
+@(uploadForm: Form[UploadController.UploadForm], captcha: Html)(implicit messages: Messages, requestHeader: RequestHeader)
 
   @import MyHelpers._
 
@@ -7,15 +7,14 @@
       <div class="col-md-8">
         <h2>Submit a new script</h2>
         @helper.form(routes.UploadController.doUpload) {
-          <fieldset class="form-group">
-            @helper.inputText(uploadForm("label"), 'class -> "form-control")
-            @helper.textarea(uploadForm("code"), 'class -> "form-control")
-            @helper.input(uploadForm("captcha"), '_label -> "confirm that you're not a robot") { (_, _, _, _) =>
-              @captcha
-              <small class="text-muted">Required</small>
-            }
-            <input class="btn btn-primary" type="submit"/>
-          </fieldset>
+          @helper.CSRF.formField
+          @helper.inputText(uploadForm("label"), 'class -> "form-control")
+          @helper.textarea(uploadForm("code"), 'class -> "form-control")
+          @helper.input(uploadForm("captcha"), '_label -> "confirm that you're not a robot") { (_, _, _, _) =>
+            @captcha
+            <small class="text-muted">Required</small>
+          }
+          <input class="btn btn-primary" type="submit"/>
         }
       </div>
       <div class="col-md-4">

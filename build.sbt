@@ -8,6 +8,7 @@ scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
   ws,
+  filters,
   specs2 % Test,
   "com.typesafe.slick" %% "slick" % "3.1.0",
   "com.typesafe.play" %% "play-slick" % "1.1.0",
