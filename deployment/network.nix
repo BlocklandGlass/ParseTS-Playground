@@ -12,7 +12,7 @@
       systemd.services = {
         inherit (wrapper.systemd.services) parsets-playground-db parsets-playground;
       };
-      firewall = {
+      networking = {
         inherit (wrapper) firewall;
       };
     };
