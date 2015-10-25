@@ -13,7 +13,7 @@
         inherit (wrapper.systemd.services) parsets-playground-db parsets-playground;
       };
       networking = {
-        inherit (wrapper) firewall;
+        inherit (wrapper.networking) firewall;
       };
     };
 }
