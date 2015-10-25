@@ -2,37 +2,37 @@
 
 @severityCssClass(severity: AnalysisResult.ComplaintSeverity) = {
 @severity match {
-    case AnalysisResult.ComplaintSeverity.Fatal => {alert-danger}
-    case AnalysisResult.ComplaintSeverity.Warning => {alert-warning}
-    case _ => {}
+  case AnalysisResult.ComplaintSeverity.Fatal => {alert-danger}
+  case AnalysisResult.ComplaintSeverity.Warning => {alert-warning}
+  case _ => {}
 }
 }
 
 @main("Snippet") {
-    <h2>Snippet: @snippet.label</h2>
-    @if(analysisResult.isEmpty) {
-        <div class="alert alert-warning">
-            <h3>Analysis in progress</h3>
-            <p>This snippet is still being analyzed, please wait...</p>
-        </div>
+  <h2>Snippet: @snippet.label</h2>
+  @if(analysisResult.isEmpty) {
+    <div class="alert alert-warning">
+      <h3>Analysis in progress</h3>
+      <p>This snippet is still being analyzed, please wait...</p>
+    </div>
+  }
+  <h3>Code:</h3>
+  <textarea readonly id="code">@snippet.code</textarea>
+  <h3>Analysis</h3>
+  <p><small>(why you're here!)</small></p>
+  @analysisResult match {
+    case None => {
+      <p>In progress...</p>
     }
-    <h3>Code:</h3>
-    <textarea readonly id="code">@snippet.code</textarea>
-    <h3>Analysis</h3>
-    <p><small>(why you're here!)</small></p>
-    @analysisResult match {
-        case None => {
-            <p>In progress...</p>
-        }
-        case Some(analysis) if analysis.complaints.isEmpty => {
-            <p>Everything looks great!</p>
-        }
-        case Some(analysis) => {
-            <ul>
-            @for(complaint <- analysis.complaints) {
-                <li class="@severityCssClass(complaint.severity)">Line @complaint.pos.line, column @complaint.pos.column: @complaint.msg</li>
-            }
-            </ul>
-        }
+    case Some(analysis) if analysis.complaints.isEmpty => {
+      <p>Everything looks great!</p>
     }
+    case Some(analysis) => {
+      <ul>
+      @for(complaint <- analysis.complaints) {
+        <li class="@severityCssClass(complaint.severity)">Line @complaint.pos.line, column @complaint.pos.column: @complaint.msg</li>
+      }
+      </ul>
+    }
+  }
 }

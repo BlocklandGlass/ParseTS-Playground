@@ -1,26 +1,30 @@
-@(uploadForm: Form[UploadController.UploadForm])(implicit messages: Messages)
+@(uploadForm: Form[UploadController.UploadForm], captcha: Html)(implicit messages: Messages)
 
-@import MyHelpers._
+  @import MyHelpers._
 
-    @main("Upload") {
-        <div class="row">
-            <div class="col-md-8">
-                <h2>Submit a new script</h2>
-                @helper.form(routes.UploadController.doUpload) {
-                    <fieldset class="form-group">
-                        @helper.inputText(uploadForm("label"), 'class -> "form-control")
-                        @helper.textarea(uploadForm("code"), 'class -> "form-control")
-                        <input class="btn btn-primary" type="submit"/>
-                    </fieldset>
-                }
-            </div>
-            <div class="col-md-4">
-                <h3>What's the point of this anyway?</h3>
-                <p>ParseTS will validate your TorqueScript scripts, and scan them for (some!) potential vulnerability sources!</p>
-                <h3>Are my submitted scripts private?</h3>
-                <p>Short answer: No!</p>
-                <p>Long answer: All submissions are saved to help improve ParseTS. At the moment they will
-                all also be public, but privacy options might come later on.</p>
-            </div>
-        </div>
-    }
+  @main("Upload") {
+    <div class="row">
+      <div class="col-md-8">
+        <h2>Submit a new script</h2>
+        @helper.form(routes.UploadController.doUpload) {
+          <fieldset class="form-group">
+            @helper.inputText(uploadForm("label"), 'class -> "form-control")
+            @helper.textarea(uploadForm("code"), 'class -> "form-control")
+            @helper.input(uploadForm("captcha"), '_label -> "confirm that you're not a robot") { (_, _, _, _) =>
+              @captcha
+              <small class="text-muted">Required</small>
+            }
+            <input class="btn btn-primary" type="submit"/>
+          </fieldset>
+        }
+      </div>
+      <div class="col-md-4">
+        <h3>What's the point of this anyway?</h3>
+        <p>ParseTS will validate your TorqueScript scripts, and scan them for (some!) potential vulnerability sources!</p>
+        <h3>Are my submitted scripts private?</h3>
+        <p>Short answer: No!</p>
+        <p>Long answer: All submissions are saved to help improve ParseTS. At the moment they will
+          all also be public, but privacy options might come later on.</p>
+      </div>
+    </div>
+  }

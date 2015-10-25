@@ -1,11 +1,11 @@
 @(snippets: Seq[(Int, CodeSnippet)])
 
 @main("Public Snippets") {
-    <ul>
-    @for((id, snippet) <- snippets) {
-        <li>
-        <a href="@routes.ListingController.byId(id)">#@id: @snippet.label</a>
-        </li>
-    }
-    </ul>
+  <ul>
+  @for((id, snippet) <- snippets) {
+    <li>
+      <a href="@routes.ListingController.byId(id)">#@id: @snippet.label</a>
+    </li>
+  }
+  </ul>
 }
