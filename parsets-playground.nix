@@ -1,4 +1,4 @@
-{ stdenv, pkgs, fetchgitLocal, jre, jdk, sbt, parsets, makeWrapper, writeText
+{ stdenv, pkgs, fetchgitLocal, jre, jdk, sbt, parsets, makeWrapper, gawk, writeText
 , pidFile ? "/dev/null"
 , devMode ? false
 , extraConfig ? ""
@@ -33,6 +33,7 @@ in stdenv.mkDerivation rec {
       cp -r target/universal/stage $out
       wrapProgram $out/bin/parsets-playground \
         --set JAVA_HOME ${jre} \
+        --suffix PATH : "${gawk}/bin" \
         --add-flags \
           -Dpidfile.path=${pidFile}
 
