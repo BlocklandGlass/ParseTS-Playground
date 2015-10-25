@@ -8,7 +8,7 @@ import slick.lifted.ProvenShape
 
 import scala.concurrent.Future
 
-case class CodeSnippet(label: String, code: String)
+case class CodeSnippet(label: String, code: String, ip: Option[String])
 
 @ImplementedBy(classOf[SlickCodeSnippetStore])
 trait CodeSnippetStore {
@@ -26,7 +26,9 @@ class CodeSnippets(tag: Tag) extends Table[(Int, CodeSnippet)](tag, "code_snippe
 
   def code = column[String]("code")
 
-  def snippet = (label, code) <>(CodeSnippet.tupled, CodeSnippet.unapply)
+  def ip = column[Option[String]]("ip")
+
+  def snippet = (label, code, ip) <>(CodeSnippet.tupled, CodeSnippet.unapply)
 
   override def * : ProvenShape[(Int, CodeSnippet)] = (id, snippet)
 }

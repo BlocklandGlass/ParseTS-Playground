@@ -29,8 +29,8 @@ class UploadController @Inject() (val messagesApi: MessagesApi, snippetStore: Co
     )
   }
 
-  private def saveUpload(upload: UploadForm): Future[Int] = {
-    val snippet = CodeSnippet(upload.label, upload.code)
+  private def saveUpload(upload: UploadForm)(implicit req: RequestHeader): Future[Int] = {
+    val snippet = CodeSnippet(upload.label, upload.code, Some(req.remoteAddress))
     snippetStore.save(snippet)
   }
 }
