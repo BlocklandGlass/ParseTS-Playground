@@ -100,7 +100,7 @@ class ParseTSAnalysisEngine @Inject()(config: Configuration) extends AnalysisEng
 
     val args = Seq(parsetsBin, "lint", path.toAbsolutePath.toString)
     try {
-      args.!!
+      args.lineStream_!.mkString("\r\n")
     } catch {
       case e: RuntimeException => throw new ParseFailedException(e)
     }
