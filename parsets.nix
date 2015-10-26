@@ -7,8 +7,8 @@ mkDerivation {
   version = "0.1.0.0";
   src = fetchgit {
     url = "git://github.com/blocklandglass/parsets";
-    sha256 = "a935c17b07b3127dfae5d0c5c3befa93b8bcb35257a77b344cb7031779369fd4";
-    rev = "277a62fd552533dcff2237e15898ba2f80318e65";
+    sha256 = "cd9495c32292c83a6503413193f16fd1f4ec1555a6bd02413ea51b60e1de7c87";
+    rev = "3a3c1eaa6d1aa3c276792006d374e6a0b48957ff";
   };
   isLibrary = false;
   isExecutable = true;
