@@ -6,5 +6,5 @@ args@{ pkgs ? (import <nixpkgs> {}).pkgs
 , extraConfig ? ""
 }:
 pkgs.callPackage ./parsets-playground.nix ({
-    parsets = pkgs.haskell.packages.lts-2_22.callPackage ./parsets.nix {};
+    parsets = pkgs.haskell.packages.lts-5_18.callPackage ./parsets.nix {};
 } // args)
