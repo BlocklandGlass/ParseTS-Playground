@@ -2,7 +2,6 @@
 , bash
 , parsets-playground
 , port
-, exposePort ? true
 , lib
 , useRecaptcha ? false
 , recaptchaSiteKey ? null
@@ -10,6 +9,7 @@
 , postgresql
 , postgresqlPort
 , postgresqlDatabase ? "parsets-playground"
+, reverseProxyIp ? null
 }:
 
 assert useRecaptcha -> (recaptchaSiteKey != null && recaptchaSecretKey != null);
@@ -20,6 +20,7 @@ let
       include "application.conf"
       play.evolutions.db.default.autoApply = true
       slick.dbs.default.db.url = "jdbc:postgresql://localhost:${toString postgresqlPort}/${postgresqlDatabase}"
+      ${lib.optionalString (reverseProxyIp != null) "play.http.forwarded.trustedProxies += ['${reverseProxyIp}']"}
       ${lib.optionalString useRecaptcha
         ''
           captcha {
@@ -54,6 +55,4 @@ in {
       script = "exec ${parsets-playground}/bin/parsets-playground -Dconfig.file=${configFile} -Dhttp.port=${toString port}";
     };
   };
-
-  networking.firewall.allowedTCPPorts = lib.mkIf exposePort [ port ];
 }

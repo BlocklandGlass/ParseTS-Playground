@@ -12,8 +12,6 @@
       systemd.services = {
         inherit (wrapper.systemd.services) parsets-playground-db parsets-playground;
       };
-      networking = {
-        inherit (wrapper.networking) firewall;
-      };
+      networking.firewall.allowedTCPPorts = [ 9000 ];
     };
 }
