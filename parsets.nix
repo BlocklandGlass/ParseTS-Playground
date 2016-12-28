@@ -1,4 +1,4 @@
-{ fetchgit, haskell, stack }:
+{ fetchgit, haskell, stack, perl, gmp }:
 haskell.lib.buildStackProject rec {
   name = "parsets-${version}";
   version = "0.1.0.0";
@@ -8,7 +8,7 @@ haskell.lib.buildStackProject rec {
     sha256 = "1xsq2yxvspdrhs1cydxd3zh25rlwqwshnhv3i49f6jix0ns2xn3a";
     rev = "aa1dff2448555535b9bab703209aa13d077f0aee";
   };
-  buildInputs = [ stack ];
+  buildInputs = [ stack perl gmp ];
   configurePhase =
     ''
       export STACK_ROOT=$NIX_BUILD_TOP/.stack
