@@ -5,8 +5,8 @@ haskell.lib.buildStackProject rec {
   ghc = haskell.compiler.ghc784;
   src = fetchgit {
     url = "git://github.com/blocklandglass/parsets";
-    sha256 = "1xsq2yxvspdrhs1cydxd3zh25rlwqwshnhv3i49f6jix0ns2xn3a";
-    rev = "aa1dff2448555535b9bab703209aa13d077f0aee";
+    sha256 = "1j4ncz7jhvdv8fg2d9sjln9l7xvf68rg1jzjc7c42cig2jaqbl1b";
+    rev = "735de344b7502d573d837b6be6622bbd095f1072";
   };
   buildInputs = [ stack perl gmp ];
   configurePhase =
